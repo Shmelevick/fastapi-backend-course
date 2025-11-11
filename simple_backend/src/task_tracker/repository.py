@@ -28,28 +28,19 @@ class TaskRepo:
             raw_response = await client.put(
                 self.BIN_URL, json=all_tasks, headers=self.HEADERS
             )
-            print(raw_response)
+            raw_response.raise_for_status()
+            log.debug("Теперь документ выглядит так: {}", raw_response.json())
 
-    def get_next_id(self, all_tasks: dict[str, str]) -> str:
-        next_id = max(int(k) for k in all_tasks) + 1
-        return str(next_id)
-
-    # get
-    async def get_task_by_id_repo(self, task_id: str) -> SimpleTask:
-        all_tasks = await self.get_all_tasks_repo()
-        task_content = all_tasks.get(task_id)
-
-        if task_id not in all_tasks or task_content is None:
-            log.error(
-                "Task not found.\ntask_id: {}, task_content: {}, all_tasks: {}",
-                task_id,
-                task_content,
-                all_tasks,
-            )
-            raise TaskNotFoundError
-
-        log.debug("task id: {}, task: {}", task_id, task_content)
-        return SimpleTask(task_id=task_id, task_content=task_content)
+    @classmethod
+    def get_next_id(cls, all_tasks: dict[str, dict[str, str]]) -> str:
+        log.debug("all_tasks: {}", all_tasks)
+        try:
+            next_id = max(int(k) for k in all_tasks if k.isdigit()) + 1
+            log.debug("Next_id: {}", next_id)
+            return str(next_id) or "1"
+        except ValueError:
+            log.error("Ошибка! Нет числовых значений в all_tasks!")
+            return "1"
 
     # create
     async def add_new_task_repo(self, task: str):

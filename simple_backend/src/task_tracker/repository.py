@@ -24,12 +24,15 @@ class TaskRepo:
             return record
 
     async def reset_full_doc_repo(self, all_tasks: dict) -> None:
-        async with httpx.AsyncClient() as client:
-            raw_response = await client.put(
-                self.BIN_URL, json=all_tasks, headers=self.HEADERS
-            )
-            raw_response.raise_for_status()
-            log.debug("Теперь документ выглядит так: {}", raw_response.json())
+        try:
+            async with httpx.AsyncClient() as client:
+                raw_response = await client.put(
+                    self.BIN_URL, json=all_tasks, headers=self.HEADERS
+                )
+                raw_response.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            log.error("Ошибка типа httpx.HTTPStatusError. Возможно, пустой json")
+            raise TryLaterError from e
 
     @classmethod
     def get_next_id(cls, all_tasks: dict[str, dict[str, str]]) -> str:

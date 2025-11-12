@@ -19,7 +19,9 @@ class LLMService:
             raw_response = await client.post(
                 self.URL,
                 headers=self.HEADERS,
-                json={"prompt": "объясни, как мне " + request_text},
+                json={
+                    "prompt": "Уложись в 867 символов. Объясни, как мне " + request_text
+                },
             )
             raw_response.raise_for_status()
             llm_response = raw_response.json()

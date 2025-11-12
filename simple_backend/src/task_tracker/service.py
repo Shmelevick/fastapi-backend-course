@@ -9,9 +9,6 @@ class TaskService:
     async def get_all_tasks_service(self) -> dict:
         return await task_repo.get_all_tasks_repo()
 
-    async def get_task_by_id(self, task_id: str) -> SimpleTask:
-        return await task_repo.get_task_by_id_repo(task_id)
-
     async def add_new_task_sevice(self, task):
         await task_repo.add_new_task_repo(task)
 

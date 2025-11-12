@@ -11,7 +11,7 @@ from simple_backend.src.task_tracker.repo.abstract_task_repo import BaseRepo
 # .env
 load_dotenv()
 
-FILE_PATH = str(os.getenv("FILE_PATH"))
+FILE_PATH: str = os.getenv("FILE_PATH")  # type: ignore
 
 if FILE_PATH is None:
     log.error("FILE_PATH = {}", FILE_PATH)

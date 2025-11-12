@@ -22,7 +22,7 @@ async def get_tasks():
 @router.post("/tasks")
 async def create_task(task_content: str = Body(...)):
     try:
-        await task_service.add_new_task_sevice(task_content)
+        await task_service.add_new_task_service(task_content)
         return {
             "message": "Заметка успешно создана!",
             "status": status.HTTP_201_CREATED,

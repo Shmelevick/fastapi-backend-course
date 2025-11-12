@@ -9,9 +9,9 @@ from simple_backend.src.task_tracker.exceptions import EnvError
 load_dotenv()
 
 # .env
-API_TOKEN = str(os.getenv("API_TOKEN"))
-ACCOUNT_ID = str(os.getenv("ACCOUNT_ID"))
-MODEL = str(os.getenv("MODEL"))
+API_TOKEN = os.getenv("API_TOKEN")
+ACCOUNT_ID = os.getenv("ACCOUNT_ID")
+MODEL = os.getenv("MODEL")
 
 if None in (API_TOKEN, ACCOUNT_ID, MODEL):
     log.error("API_TOKEN, ACCOUNT_ID, MODEL = {}, {}, {}", API_TOKEN, ACCOUNT_ID, MODEL)

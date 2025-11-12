@@ -31,7 +31,7 @@ class TaskService:
     async def get_all_tasks_service(self) -> dict:
         return await task_repo.get_all_tasks_repo()
 
-    async def add_new_task_sevice(self, task):
+    async def add_new_task_service(self, task):
         await task_repo.add_new_task_repo(task)
 
     async def update_task_service(self, task_id, new_task_content) -> SimpleTask:

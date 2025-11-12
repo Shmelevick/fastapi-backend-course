@@ -1,7 +1,9 @@
 import httpx
+from fastapi import HTTPException, status
 from loguru import logger as log
 
-from simple_backend.src.task_tracker.exceptions import TaskNotFoundError
+from simple_backend.src.task_tracker.exceptions import TaskNotFoundError, TryLaterError
+from simple_backend.src.task_tracker.outer_llm import llm_service
 from simple_backend.src.task_tracker.schemas import SimpleTask
 
 # .env
@@ -13,14 +15,14 @@ class TaskRepo:
     BIN_URL = f"https://api.jsonbin.io/v3/b/{BIN_ID}"
     HEADERS = {"X-Access-Key": API_KEY, "Content-Type": "application/json"}
 
-    # @classmethod вызывает проблемы с асинхронностью
-    async def get_all_tasks_repo(self) -> dict:
+    # get
+    async def get_all_tasks_repo(self) -> dict[str, dict]:
         async with httpx.AsyncClient() as client:
             raw_response = await client.get(self.BIN_URL, headers=self.HEADERS)
+            raw_response.raise_for_status()
             json_response = raw_response.json()
             record = json_response.get("record")
             log.debug("\nResponse: {}\nRecord: {}", json_response, record)
-            print(type(record), record["1"])
             return record
 
     async def reset_full_doc_repo(self, all_tasks: dict) -> None:
@@ -46,15 +48,21 @@ class TaskRepo:
             return "1"
 
     # create
-    async def add_new_task_repo(self, task: str):
+    async def add_new_task_repo(self, task_content: str):
         all_tasks = await self.get_all_tasks_repo()
         next_id = self.get_next_id(all_tasks)
-        all_tasks[next_id] = task
+        log.debug("next_id: {}, task_content: {}", next_id, task_content)
+
+        llm_solution = await llm_service.make_request(task_content)
+        all_tasks[next_id] = {
+            "task_id": next_id,
+            "task_content": task_content,
+            "task_solution": llm_solution,
+        }
         await self.reset_full_doc_repo(all_tasks)
 
     # update
     async def update_task_repo(self, task_id: str, new_task_content: str) -> SimpleTask:
-        """Частично повторим get_task_by_id, чтобы сделать меньше внешних запросов"""
         all_tasks = await self.get_all_tasks_repo()
         old_task_content = all_tasks.get(task_id)
 
@@ -68,16 +76,26 @@ class TaskRepo:
             )
             raise TaskNotFoundError
 
-        all_tasks[task_id] = new_task_content
+        llm_solution = await llm_service.make_request(new_task_content)
+
+        updated_task = {
+            "task_id": task_id,
+            "task_content": new_task_content,
+            "task_solution": llm_solution,
+        }
+        all_tasks[task_id] = updated_task
         await self.reset_full_doc_repo(all_tasks)
 
-        updated_task = SimpleTask(task_id=task_id, task_content=new_task_content)
         log.info("Updated task {}: {} -> {}", task_id, old_task_content, updated_task)
-        return updated_task
+        return SimpleTask(**updated_task)
 
     # delete
     async def delete_task_repo(self, task_id: str) -> None:
         all_tasks = await self.get_all_tasks_repo()
+
+        print(task_id, type(task_id), all_tasks)
+        print(repr(task_id))
+        print(type(list(all_tasks.keys())))
 
         # not found
         if task_id not in all_tasks:
@@ -88,7 +106,7 @@ class TaskRepo:
             )
             raise TaskNotFoundError
 
-        log.info("Удалена запись id={}: {}", task_id, all_tasks[task_id])
+        log.info("Сейчас удалится запись id={}: {}", task_id, all_tasks[task_id])
         del all_tasks[task_id]
         await self.reset_full_doc_repo(all_tasks)
 

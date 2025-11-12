@@ -1,8 +1,32 @@
+import os
+
+from dotenv import load_dotenv
 from loguru import logger as log
 
-from simple_backend.src.task_tracker.exceptions import TaskNotFoundError
-from simple_backend.src.task_tracker.repo.repository import task_repo
+from simple_backend.src.task_tracker.exceptions import (
+    EnvError,
+    TaskNotFoundError,
+)  # noqa: F401
+from simple_backend.src.task_tracker.repo.task_repo_outer_json import task_repo_outer
 from simple_backend.src.task_tracker.schemas import SimpleTask
+
+load_dotenv()
+
+REPO = os.getenv("REPO")
+match REPO:
+    case "LOCAL":
+        log.info("REPO = {}", REPO)
+        from simple_backend.src.task_tracker.repo.task_repo_local_json import (
+            task_repo_local as task_repo,
+        )  # noqa: F401
+    case "OUTER":
+        log.info("REPO = {}", REPO)
+        from simple_backend.src.task_tracker.repo.task_repo_outer_json import (
+            task_repo_outer as task_repo,
+        )  # noqa: F401
+    case _:
+        log.error("REPO = {}", REPO)
+        raise EnvError("Проверить .env")
 
 
 class TaskService:

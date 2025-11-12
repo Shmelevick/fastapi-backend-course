@@ -93,10 +93,6 @@ class TaskRepo:
     async def delete_task_repo(self, task_id: str) -> None:
         all_tasks = await self.get_all_tasks_repo()
 
-        print(task_id, type(task_id), all_tasks)
-        print(repr(task_id))
-        print(type(list(all_tasks.keys())))
-
         # not found
         if task_id not in all_tasks:
             log.error(

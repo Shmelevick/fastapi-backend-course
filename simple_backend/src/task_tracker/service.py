@@ -1,7 +1,7 @@
 from loguru import logger as log
 
 from simple_backend.src.task_tracker.exceptions import TaskNotFoundError
-from simple_backend.src.task_tracker.repository import task_repo
+from simple_backend.src.task_tracker.repo.repository import task_repo
 from simple_backend.src.task_tracker.schemas import SimpleTask
 
 

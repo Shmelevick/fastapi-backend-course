@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Body, HTTPException, status
 from loguru import logger as log
 
-from simple_backend.src.task_tracker.exceptions import TaskNotFoundError
+from simple_backend.src.task_tracker.exceptions import TaskNotFoundError, TryLaterError
 from simple_backend.src.task_tracker.service import task_service
 
 router = APIRouter()
 
 
+# TODO увеличить лимит str
 @router.get("/tasks")
 async def get_tasks():
     try:
@@ -18,9 +19,9 @@ async def get_tasks():
 
 
 @router.post("/tasks")
-async def create_task(task):
+async def create_task(task_content: str = Body(...)):
     try:
-        await task_service.add_new_task_sevice(task)
+        await task_service.add_new_task_sevice(task_content)
         return {
             "message": "Заметка успешно создана!",
             "status": status.HTTP_201_CREATED,
@@ -53,4 +54,9 @@ async def delete_task(task_id: str):
     except TaskNotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Task not found"
+        ) from e
+    except TryLaterError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Please, try later",
         ) from e

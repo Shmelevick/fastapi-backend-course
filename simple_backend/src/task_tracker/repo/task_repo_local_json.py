@@ -1,15 +1,12 @@
 import json
 import os
-from typing import cast
 
 import aiofiles
 from dotenv import load_dotenv
 from loguru import logger as log
 
-from simple_backend.src.task_tracker.exceptions import EnvError, TaskNotFoundError
-from simple_backend.src.task_tracker.outer_llm import llm_service
+from simple_backend.src.task_tracker.exceptions import EnvError
 from simple_backend.src.task_tracker.repo.abstract_task_repo import BaseRepo
-from simple_backend.src.task_tracker.schemas import SimpleTask
 
 # .env
 load_dotenv()

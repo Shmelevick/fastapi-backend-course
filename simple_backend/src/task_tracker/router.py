@@ -12,8 +12,10 @@ async def get_tasks():
     try:
         return await task_service.get_all_tasks_service()
     except Exception as e:
+        log.error("Ошибка: {}", e)
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error on server"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Please, try later",
         ) from e
 
 
@@ -26,8 +28,10 @@ async def create_task(task_content: str = Body(...)):
             "status": status.HTTP_201_CREATED,
         }
     except Exception as e:
+        log.error("Ошибка: {}", e)
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error on server"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Please, try later",
         ) from e
 
 
@@ -43,6 +47,12 @@ async def update_task(task_id: str, task_content: str = Body(...)):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Task not found"
         ) from e
+    except Exception as e:
+        log.error("Ошибка: {}", e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Please, try later",
+        ) from e
 
 
 @router.delete("/tasks/{task_id}")
@@ -55,6 +65,12 @@ async def delete_task(task_id: str):
             status_code=status.HTTP_404_NOT_FOUND, detail="Task not found"
         ) from e
     except TryLaterError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Please, try later",
+        ) from e
+    except Exception as e:
+        log.error("Ошибка: {}", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Please, try later",

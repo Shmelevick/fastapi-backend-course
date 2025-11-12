@@ -5,9 +5,7 @@ from loguru import logger as log
 
 from simple_backend.src.task_tracker.exceptions import (
     EnvError,
-    TaskNotFoundError,
 )  # noqa: F401
-from simple_backend.src.task_tracker.repo.task_repo_outer_json import task_repo_outer
 from simple_backend.src.task_tracker.schemas import SimpleTask
 
 load_dotenv()

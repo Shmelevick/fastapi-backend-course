@@ -12,8 +12,8 @@ from simple_backend.src.task_tracker.repo.abstract_task_repo import BaseRepo
 
 load_dotenv()
 
-BIN_ID = os.getenv("BIN_ID")
-API_KEY = os.getenv("API_KEY")
+BIN_ID = str(os.getenv("BIN_ID"))
+API_KEY = str(os.getenv("API_KEY"))
 
 if None in (BIN_ID, API_KEY):
     log.error("BIN_ID, API_KEY = {}, {}", BIN_ID, API_KEY)
@@ -26,13 +26,19 @@ class TaskRepoOuter(BaseRepo):
 
     # get
     async def get_all_tasks_repo(self) -> dict[str, dict]:
-        async with httpx.AsyncClient() as client:
-            raw_response = await client.get(self.BIN_URL, headers=self.HEADERS)
-            raw_response.raise_for_status()
-            json_response = raw_response.json()
-            record = json_response.get("record")
-            log.debug("\nResponse: {}\nRecord: {}", json_response, record)
-            return record
+        try:
+            async with httpx.AsyncClient() as client:
+                raw_response = await client.get(self.BIN_URL, headers=self.HEADERS)
+                raw_response.raise_for_status()
+                json_response = raw_response.json()
+                record = json_response.get("record")
+                log.debug("\nResponse: {}\nRecord: {}", json_response, record)
+                return record
+        except httpx.HTTPStatusError as e:
+            log.error("Ошибка типа httpx.HTTPStatusError: {}", e)
+            raise TryLaterError from e
+        except Exception as e:
+            log.error("Ошибка при вызове jsonbin.io: {}", e)
 
     async def reset_full_doc_repo(self, all_tasks: dict) -> None:
         try:

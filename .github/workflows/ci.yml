@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [second-branch]
+  pull_request:
+    branches: [second-branch]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Клонирование репо
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Установка Python (если нужна конкретная версия)
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 3. Установка ruff (вариант 1 – pip)
+      - name: Install ruff
+        run: python -m pip install --upgrade pip && pip install ruff
+
+      # 4. Проверка линтингом + аннотации в PR
+      - name: Lint with ruff
+        run: ruff check --output-format=github .
+
+      # 5. Проверка форматирования (fail, если не отформатировано)
+      - name: Check code formatting
+        run: ruff format --check .

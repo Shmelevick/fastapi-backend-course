@@ -7,7 +7,6 @@ from simple_backend.src.task_tracker.service import task_service
 router = APIRouter()
 
 
-# TODO увеличить лимит str
 @router.get("/tasks")
 async def get_tasks():
     try:

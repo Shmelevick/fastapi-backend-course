@@ -1,10 +1,21 @@
+import os
+
 import httpx
+from dotenv import load_dotenv
 from loguru import logger as log
 
+from simple_backend.src.task_tracker.exceptions import EnvError
+
+load_dotenv()
+
 # .env
-API_TOKEN = "ZOXT38HqVHmWwczS0QVN_en_01-LAC_xCZjcbmZp"
-ACCOUNT_ID = "98059c84d2b66b5c06a1347a81f0ca37"
-MODEL = "llama-3.1-8b-instruct"
+API_TOKEN = str(os.getenv("API_TOKEN"))
+ACCOUNT_ID = str(os.getenv("ACCOUNT_ID"))
+MODEL = str(os.getenv("MODEL"))
+
+if None in (API_TOKEN, ACCOUNT_ID, MODEL):
+    log.error("API_TOKEN, ACCOUNT_ID, MODEL = {}, {}, {}", API_TOKEN, ACCOUNT_ID, MODEL)
+    raise EnvError("Проверить .env")
 
 
 class LLMService:

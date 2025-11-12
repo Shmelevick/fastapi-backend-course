@@ -4,3 +4,7 @@ class TaskNotFoundError(Exception):
 
 class TryLaterError(Exception):
     pass
+
+
+class EnvError(Exception):
+    pass
